@@ -1,8 +1,8 @@
 package Clients;
 
 import Utils.AES;
+import Utils.MessageBus;
 
-import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Base64;
@@ -37,9 +37,15 @@ public class TalkCommand implements Commandable{
                     this.client.getKdcPort()
             );
 
-            this.sendCommand(serverSocket);
+            MessageBus messageBus = new MessageBus(serverSocket);
 
-            String kdcAnswer = this.receive(serverSocket);
+            byte[] ciphered = AES.cifra(this.talkTo.getBytes(),this.client.getKey());
+
+            String base64Ciphered = Base64.getEncoder().encodeToString(ciphered);
+
+            messageBus.send("TALK:" + this.client.getName() + "," + base64Ciphered );
+
+            String kdcAnswer = messageBus.receive();
 
             System.out.println("KDC Answer: " + kdcAnswer);
 
@@ -59,17 +65,27 @@ public class TalkCommand implements Commandable{
                         destinationPort
                 );
 
-                byte[] message = (this.talkTo + "|" + "KSESSION|" + this.client.getkSession() + "|" + this.client.getPort()).getBytes();
+                MessageBus destinationBus = new MessageBus(destinationSocket);
 
-                this.send(
-                        destinationSocket,
-                        Base64.getEncoder().encodeToString(message)
-                );
+                byte[] message = (this.talkTo + "|" + "KSESSION|" + decodedMessage[1]).getBytes();
 
-                String peerResponse = this.receive(destinationSocket);
+                destinationBus.send( Base64.getEncoder().encodeToString(message) );
 
-                System.out.println("Response: " + peerResponse);
+                String peerResponse = destinationBus.receive();
 
+                String decodedResponse = new String(AES.decifra(Base64.getDecoder().decode(peerResponse),this.client.getkSession()),"UTF-8");
+
+                System.out.println(this.client.getName() + " recebeu o número " + decodedResponse );
+
+                int nonce = this.client.check(Integer.parseInt(decodedResponse));
+
+                System.out.println(this.client.getName() + " passou o nonce pela função de chegacem e obteve " + nonce);
+
+                destinationBus.send("CHECKRESULT|" + Integer.toString(nonce));
+
+                String worked = destinationBus.receive();
+
+                System.out.println(worked.equals("TRUE") ? "Comunicação realizada com sucesso. " : " Falha na comunicação ");
             }
         }
         catch (Exception e)
@@ -81,41 +97,6 @@ public class TalkCommand implements Commandable{
     private int getDestinationPort()
     {
         return this.client.getDestPort(this.talkTo);
-    }
-
-    private void sendCommand(Socket serverSocket) throws Exception
-    {
-
-        byte[] ciphered = AES.cifra(this.talkTo.getBytes(),this.client.getKey());
-
-        String base64Ciphered = Base64.getEncoder().encodeToString(ciphered);
-
-        this.send(serverSocket, "TALK:" + this.client.getName() + "," + base64Ciphered );
-    }
-
-    private void send(Socket socket, String message) throws IOException
-    {
-
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
-                socket.getOutputStream()
-        );
-
-        BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
-
-        bufferedWriter.write(message);
-
-        bufferedWriter.flush();
-    }
-
-    private String receive(Socket socket) throws IOException
-    {
-        InputStream inputStream = socket.getInputStream();
-
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        return bufferedReader.readLine();
     }
 
     private String[] decodeKdcAnswer(String kdcAnswer)

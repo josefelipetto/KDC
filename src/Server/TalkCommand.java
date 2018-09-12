@@ -1,9 +1,11 @@
 package Server;
 
 import Utils.AES;
+import Utils.MessageBus;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.Base64;
 
@@ -27,12 +29,13 @@ public class TalkCommand implements Commandable {
 
         try
         {
+            MessageBus clientBus = new MessageBus(this.clientSocket);
 
             String senderKey = this.getUserKey();
 
             if(senderKey == null)
             {
-                this.kdc.respond("User not found");
+                clientBus.send("User not found");
                 return ;
             }
 
@@ -45,13 +48,13 @@ public class TalkCommand implements Commandable {
 
             if(destinationKey == null)
             {
-                this.kdc.respond("Destination not found");
+                clientBus.send("Destination not found");
                 return;
             }
 
             String kSession = this.generateKSession(senderKey,destinationKey);
 
-            this.kdc.respond("KSESSION|"+kSession);
+            clientBus.send("KSESSION|"+kSession);
 
         }
         catch (Exception e)
@@ -74,6 +77,7 @@ public class TalkCommand implements Commandable {
 
     private String getUserKey()
     {
+
         return this.kdc.getKey(this.params[0]);
     }
 
@@ -85,11 +89,6 @@ public class TalkCommand implements Commandable {
     private String generateKSession(String senderKey, String destinationKey) throws Exception
     {
         String random = this.kdc.random();
-
-
-//                        String kSession = new String(AES.cifra(random,senderKey),"UTF-8")
-//                                + "_SEPARATOR_"
-//                                + new String(AES.cifra(random,destinationKey),"UTF-8");
 
         return Base64.getEncoder().encodeToString(AES.cifra(random,senderKey))
                 + "_SEPARATOR_"

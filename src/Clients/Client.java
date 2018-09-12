@@ -23,6 +23,13 @@ public class Client {
 
     private Scanner scanner = new Scanner(System.in);
 
+    public static void main(String[] args)
+    {
+        Client client = new Client();
+
+        client.start();
+    }
+
     public Client() {
 
         contacts.add(Map.of("BOB",6580));
@@ -33,7 +40,7 @@ public class Client {
 
         Thread thread = new Thread( new ClientListener(this) );
 
-        thread.run();
+        thread.start();
 
     }
 
@@ -118,7 +125,7 @@ public class Client {
 
         this.port = Integer.parseInt( params[1] );
 
-        this.kSession = params[2];
+        this.key = params[2];
 
     }
 

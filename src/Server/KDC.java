@@ -1,5 +1,7 @@
 package Server;
 
+import Utils.MessageBus;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
@@ -27,10 +29,9 @@ public class KDC implements Runnable{
 
         try
         {
+            MessageBus clientBus = new MessageBus(this.clientSocket);
 
-            DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
-
-            String messageReceived = dataInputStream.readUTF();
+            String messageReceived = clientBus.receive();
 
             print(" Received message: " + messageReceived );
 
@@ -79,18 +80,6 @@ public class KDC implements Runnable{
         return new Random().ints( 16,0,this.chars.length() )
                 .mapToObj( i -> "" + this.chars.charAt(i) )
                 .collect(Collectors.joining());
-    }
-
-    public void respond(String message) throws IOException
-    {
-
-        BufferedWriter bufferedWriter = new BufferedWriter(
-            new OutputStreamWriter(this.clientSocket.getOutputStream())
-        );
-
-        bufferedWriter.write(message);
-
-        bufferedWriter.flush();
     }
 
     private static void print(String message)

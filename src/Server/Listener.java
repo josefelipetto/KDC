@@ -8,6 +8,13 @@ public class Listener {
 
     private static final int serverPort = 6578;
 
+    public static void main(String[] args)
+    {
+        Listener listener = new Listener();
+
+        listener.startServer();
+    }
+
     public void startServer() {
         ServerSocket serverSocket = null;
 
@@ -39,12 +46,5 @@ public class Listener {
             }
 
         }
-    }
-
-    public static void main(String[] args)
-    {
-        Listener listener = new Listener();
-
-        listener.startServer();
     }
 }
