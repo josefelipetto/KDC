@@ -15,13 +15,18 @@ public class TCP {
         this.port = port;
     }
 
+    private Socket receiver;
+
+    private Socket sender;
+
     public void send(String message, int portTo)
     {
         try
         {
-            Socket socket = new Socket("localhost",portTo);
+            this.sender = new Socket("localhost",portTo);
 
-            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream dataOutputStream = new DataOutputStream(this.sender.getOutputStream());
+
             dataOutputStream.writeUTF(message);
         }
         catch (IOException e)
@@ -38,9 +43,9 @@ public class TCP {
         {
             ServerSocket serverSocket = new ServerSocket(this.getPort());
 
-            Socket socket = serverSocket.accept();
+            this.receiver = serverSocket.accept();
 
-            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+            DataInputStream dataInputStream = new DataInputStream(this.receiver.getInputStream());
 
             message = dataInputStream.readUTF();
         }
@@ -51,6 +56,40 @@ public class TCP {
 
         return message;
 
+    }
+
+    public String sendAndReceive(String message, int portTo)
+    {
+        String response = null;
+
+        try
+        {
+            this.sender = new Socket("localhost",portTo);
+
+            DataOutputStream dataOutputStream = new DataOutputStream(this.sender.getOutputStream());
+
+            dataOutputStream.writeUTF(message);
+
+            DataInputStream dataInputStream = new DataInputStream(this.sender.getInputStream());
+
+            response = dataInputStream.readUTF();
+
+            this.sender.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+    public Socket getReceiver() {
+        return receiver;
+    }
+
+    public Socket getSender() {
+        return sender;
     }
 
     private int getPort()

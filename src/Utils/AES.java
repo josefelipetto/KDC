@@ -40,27 +40,4 @@ public class AES
 
         return decifrador.doFinal(texto);
     }
-
-    public static void main(String[] args) {
-
-        try
-        {
-            String chave = "secretsecretsecr"; //tamanho: 16
-
-            String texto = "ALO";
-
-            byte[] textoCifrado = AES.cifra(texto, chave);
-
-            byte[] textoDecifrado = AES.decifra(textoCifrado,chave);
-
-            System.out.println(new String(textoCifrado));
-
-            System.out.println(new String(textoDecifrado));
-
-        }
-        catch(Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
-    }
 }
