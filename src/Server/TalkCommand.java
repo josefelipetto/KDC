@@ -4,8 +4,6 @@ import Utils.AES;
 import Utils.MessageBus;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.Base64;
 
@@ -15,12 +13,12 @@ public class TalkCommand implements Commandable {
 
     private KDC kdc;
 
-    private String[] params;
+    private Destination destination;
 
     public TalkCommand(Socket clientSocket, KDC kdc, String[] params) {
         this.clientSocket = clientSocket;
         this.kdc = kdc;
-        this.params = params;
+        this.destination = new Destination(params[0],params[1]);
     }
 
 
@@ -40,7 +38,7 @@ public class TalkCommand implements Commandable {
             }
 
             String destination = new String(
-                    AES.decifra(Base64.getDecoder().decode(this.params[1]),senderKey),
+                    AES.decifra(Base64.getDecoder().decode(this.destination.getKey()),senderKey),
                     "UTF-8"
             );
 
@@ -78,7 +76,7 @@ public class TalkCommand implements Commandable {
     private String getUserKey()
     {
 
-        return this.kdc.getKey(this.params[0]);
+        return this.kdc.getKey(this.destination.getName());
     }
 
     private String getDestinationKey(String destination)

@@ -47,8 +47,6 @@ public class TalkCommand implements Commandable{
 
             String kdcAnswer = messageBus.receive();
 
-            System.out.println("KDC Answer: " + kdcAnswer);
-
             serverSocket.close();
 
             String[] decoded = this.decodeKdcAnswer(kdcAnswer);
@@ -75,17 +73,13 @@ public class TalkCommand implements Commandable{
 
                 String decodedResponse = new String(AES.decifra(Base64.getDecoder().decode(peerResponse),this.client.getkSession()),"UTF-8");
 
-                System.out.println(this.client.getName() + " recebeu o número " + decodedResponse );
-
                 int nonce = this.client.check(Integer.parseInt(decodedResponse));
-
-                System.out.println(this.client.getName() + " passou o nonce pela função de chegacem e obteve " + nonce);
 
                 destinationBus.send("CHECKRESULT|" + Integer.toString(nonce));
 
                 String worked = destinationBus.receive();
 
-                System.out.println(worked.equals("TRUE") ? "Comunicação realizada com sucesso. " : " Falha na comunicação ");
+                System.out.println(worked.equals("TRUE") ? "Communication was successfuly done " : " Fail on the communication configuration");
             }
         }
         catch (Exception e)

@@ -1,5 +1,7 @@
 package Clients;
 
+import Server.ShowContacts;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,14 @@ public class Client {
             if(command[0].equalsIgnoreCase("talk"))
             {
                 (new TalkCommand(this, command[1])).handle();
+            }
+            else if(command[0].equalsIgnoreCase("show") && command[1].equalsIgnoreCase("contacts"))
+            {
+                (new ShowContacts(this.contacts)).handle();
+            }
+            else if(command[0].equalsIgnoreCase("show") && command[1].equalsIgnoreCase("commands"))
+            {
+                this.displayCommands();
             }
 
         }
@@ -117,7 +127,7 @@ public class Client {
     private void readInput()
     {
 
-        System.out.print("Digite o nome,porta e chave, separados por , : ");
+        System.out.print("Enter user name, port and key, separated by comma  : ");
 
         String[] params = this.scanner.nextLine().split(",");
 
@@ -132,11 +142,18 @@ public class Client {
     private String[] readCommand()
     {
 
-        System.out.print("Digite um comando: ");
+        System.out.print("\nEnter a command: ");
 
         String command = this.scanner.nextLine();
 
         return command.split(" ");
+    }
+
+    private void displayCommands()
+    {
+        System.out.println(" ============= Available commands ==============");
+        System.out.println(" 1 - talk [peerName]");
+        System.out.println(" ===============================================");
     }
 
 

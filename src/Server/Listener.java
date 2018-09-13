@@ -29,7 +29,7 @@ public class Listener {
             e.printStackTrace();
         }
 
-        System.out.println("Listener started! ");
+        System.out.println("Listener initiated! ");
 
         while (true)
         {

@@ -11,7 +11,7 @@ public class KDC implements Runnable{
 
     private List<Map<String,String>> keys = new ArrayList<>();
 
-    private String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789!@#$%*()";
+
 
     private Socket clientSocket;
 
@@ -32,8 +32,6 @@ public class KDC implements Runnable{
             MessageBus clientBus = new MessageBus(this.clientSocket);
 
             String messageReceived = clientBus.receive();
-
-            print(" Received message: " + messageReceived );
 
             String[] command = messageReceived.split(":");
 
@@ -65,10 +63,9 @@ public class KDC implements Runnable{
         }
         catch (NullPointerException e)
         {
-            print("Não achou a chave no Server.KDC");
+            System.out.println(" Couldnt find user key. ");
             return null;
         }
-
     }
 
     public List<Map<String, String>> getKeys() {
@@ -77,14 +74,11 @@ public class KDC implements Runnable{
 
     public String random()
     {
-        return new Random().ints( 16,0,this.chars.length() )
-                .mapToObj( i -> "" + this.chars.charAt(i) )
-                .collect(Collectors.joining());
-    }
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789!@#$%*()";
 
-    private static void print(String message)
-    {
-        System.out.println(message);
+        return new Random().ints( 16,0,chars.length() )
+                .mapToObj( i -> "" + chars.charAt(i) )
+                .collect(Collectors.joining());
     }
 
 }

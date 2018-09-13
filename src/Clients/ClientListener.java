@@ -25,13 +25,10 @@ public class ClientListener implements Runnable {
 
             while (true)
             {
-                System.out.println("Client " + this.client.getName() + " waiting.. ");
 
                 Socket clientSocket = serverSocket.accept();
 
                 MessageBus clientBus = new MessageBus(clientSocket);
-
-                System.out.println(this.client.getName() + " received a connection. ");
 
                 String message = clientBus.receive();
 
@@ -47,11 +44,7 @@ public class ClientListener implements Runnable {
 
                     int nonce = this.getNonce();
 
-                    System.out.println(this.client.getName() + " gerou um nonce = " + nonce );
-
                     this.client.setExpectedNonceResult(nonce);
-
-                    System.out.println("O nonce esperado por " + this.client.getName() + " = " + this.client.getExpectedNonceResult() );
 
                     String checkCommand = this.cifra(Integer.toString(nonce),this.client.getkSession());
 
@@ -59,32 +52,23 @@ public class ClientListener implements Runnable {
 
                     String peerResponse = clientBus.receive();
 
-                    // Continuar aqui
-                    System.out.println("O Outro peer mandou " + (peerResponse.split("\\|"))[1]);
-
                     if(this.client.getExpectedNonceResult() != Integer.parseInt((peerResponse.split("\\|"))[1]) )
                     {
-                        System.out.println(" A verificação falhou ");
+                        System.out.println(" Check failed ");
                         clientBus.send("FAILED");
                         continue;
                     }
 
-                    System.out.println("A checagem está completa");
+                    System.out.println("Check was successfully done");
 
                     clientBus.send("TRUE");
 
                 }
                 else if( command[0].equalsIgnoreCase("CHECK"))
                 {
-                    System.out.println("CHECK");
-
                     int nonce = this.client.check( Integer.parseInt(command[1]));
 
                     clientBus.send("CHECKRESULT|" + Integer.toString(nonce));
-                }
-                else if(command[0].equalsIgnoreCase("FAILED") || command[0].equalsIgnoreCase("SUCCESS"))
-                {
-                    System.out.println("Worked ? " + command[0]);
                 }
                 else
                 {
